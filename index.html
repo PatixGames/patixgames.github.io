@@ -2,20 +2,870 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Patix Games</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Patix Games — tiny games, made with care</title>
+  <meta name="description" content="Patix Games is a small indie team making cozy, colorful casual games for mobile. Car Sort Jam and Clouds on Payroll are out now on Google Play.">
+  <meta property="og:title" content="Patix Games">
+  <meta property="og:description" content="Tiny casual games, made with care. Car Sort Jam and Clouds on Payroll — out now on Google Play.">
+  <meta property="og:type" content="website">
+  <meta name="theme-color" content="#f6f3ee">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%231d1b26'/%3E%3Cpath d='M11.5 24V9h5.5a4.5 4.5 0 0 1 0 9h-5.5' fill='none' stroke='%23fff' stroke-width='3.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='23' cy='23' r='3' fill='%23ff6b57'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Unbounded:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f6f3ee;
+      --paper: #fffdf9;
+      --ink: #1d1b26;
+      --muted: #6e6a7a;
+      --line: rgba(29, 27, 38, .09);
+      --coral: #ff6b57;
+      --blue: #3d7bff;
+      --yellow: #ffc23d;
+      --green: #35c27a;
+      --purple: #9466ff;
+      --orange: #ff933c;
+      --lav: #d8d1f5;
+      --ease: cubic-bezier(.22, 1, .36, 1);
+      --spring: cubic-bezier(.34, 1.56, .64, 1);
+      --display: "Unbounded", "Manrope", system-ui, sans-serif;
+      --body: "Manrope", system-ui, -apple-system, "Segoe UI", sans-serif;
+      --wrap: 1180px;
+      --gutter: 24px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font: 500 17px/1.6 var(--body);
+      font-variant-numeric: lining-nums;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+    img { display: block; max-width: 100%; }
+    a { color: inherit; }
+    ::selection { background: var(--yellow); color: var(--ink); }
+    .wrap { width: 100%; max-width: var(--wrap); margin: 0 auto; padding: 0 var(--gutter); }
+
+    /* ---------- nav ---------- */
+    .nav {
+      position: fixed; inset: 0 0 auto; z-index: 50;
+      transition: background .4s var(--ease), box-shadow .4s var(--ease);
+    }
+    .nav.scrolled {
+      background: rgba(246, 243, 238, .78);
+      backdrop-filter: blur(14px) saturate(1.4);
+      -webkit-backdrop-filter: blur(14px) saturate(1.4);
+      box-shadow: 0 1px 0 var(--line);
+    }
+    .nav .wrap { display: flex; align-items: center; justify-content: space-between; height: 72px; }
+    .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; font: 600 17px/1 var(--display); letter-spacing: -.01em; }
+    .brand svg { width: 34px; height: 34px; transition: transform .5s var(--spring); }
+    .brand:hover svg { transform: rotate(-10deg) scale(1.08); }
+    .nav-links { display: flex; align-items: center; gap: 6px; }
+    .nav-links a {
+      text-decoration: none; font-weight: 600; font-size: 15px;
+      padding: 9px 14px; border-radius: 99px; transition: background .25s;
+    }
+    .nav-links a:hover { background: rgba(29, 27, 38, .06); }
+    .nav-links .pill { background: var(--ink); color: #fff; }
+    .nav-links .pill:hover { background: #34313f; }
+
+    /* ---------- hero ---------- */
+    .hero { position: relative; padding: 128px 0 72px; min-height: 100vh; display: flex; align-items: center; }
+    .hero::before {
+      content: ""; position: absolute; inset: 0; z-index: -1;
+      background-image: radial-gradient(rgba(29, 27, 38, .11) 1.2px, transparent 1.3px);
+      background-size: 26px 26px;
+      -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 45%, #000 20%, transparent 75%);
+      mask-image: radial-gradient(ellipse 70% 60% at 50% 45%, #000 20%, transparent 75%);
+    }
+    .blob { position: absolute; z-index: -2; border-radius: 50%; filter: blur(70px); opacity: .5; pointer-events: none; }
+    .blob.b1 { width: 420px; height: 420px; background: #ffd6a8; top: 8%; left: -6%; animation: drift 18s ease-in-out infinite alternate; }
+    .blob.b2 { width: 380px; height: 380px; background: #cfdcff; bottom: 2%; right: -4%; animation: drift 22s ease-in-out infinite alternate-reverse; }
+    @keyframes drift { to { transform: translate(60px, -40px) scale(1.12); } }
+
+    .hero .wrap { display: grid; grid-template-columns: 1.05fr 1fr; gap: 40px; align-items: center; }
+    .eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 13px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--muted);
+    }
+    .eyebrow::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--coral); box-shadow: 14px 0 0 var(--yellow), 28px 0 0 var(--blue); margin-right: 30px; }
+    h1 {
+      font: 700 clamp(44px, 7.4vw, 96px)/1.02 var(--display);
+      letter-spacing: -.045em; margin: 22px 0 26px;
+    }
+    h1 .w { display: inline-block; overflow: hidden; vertical-align: top; padding: 0 .02em .06em; margin-bottom: -.06em; }
+    h1 .w > span { display: inline-block; transform: translateY(110%); animation: rise 1s var(--ease) forwards; animation-delay: calc(var(--i) * 80ms + 150ms); }
+    @keyframes rise { to { transform: none; } }
+    h1 .mark { position: relative; color: var(--coral); }
+    h1 .scribble { position: absolute; left: -4%; right: -4%; bottom: -.12em; width: 108%; height: .32em; overflow: visible; }
+    h1 .scribble path { stroke-dasharray: 1; stroke-dashoffset: 1; animation: draw 1.1s var(--ease) 1.1s forwards; }
+    @keyframes draw { to { stroke-dashoffset: 0; } }
+    .lede { font-size: clamp(17px, 1.6vw, 20px); color: var(--muted); max-width: 460px; margin: 0 0 34px; opacity: 0; animation: fade 1s var(--ease) .7s forwards; }
+    @keyframes fade { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+    .cta { display: flex; flex-wrap: wrap; gap: 12px; opacity: 0; animation: fade 1s var(--ease) .85s forwards; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 10px;
+      padding: 15px 24px; border-radius: 99px; border: 0; cursor: pointer;
+      font: 700 15px/1 var(--body); text-decoration: none;
+      transition: transform .35s var(--spring), background .25s, box-shadow .35s var(--ease);
+    }
+    .btn:hover { transform: translateY(-2px); }
+    .btn:active { transform: translateY(0) scale(.97); }
+    .btn-dark { background: var(--ink); color: #fff; box-shadow: 0 10px 24px -10px rgba(29, 27, 38, .6); }
+    .btn-dark:hover { box-shadow: 0 16px 30px -12px rgba(29, 27, 38, .6); }
+    .btn-ghost { background: transparent; color: var(--ink); box-shadow: inset 0 0 0 2px var(--line); }
+    .btn-ghost:hover { box-shadow: inset 0 0 0 2px var(--ink); }
+    .btn svg { width: 18px; height: 18px; transition: transform .35s var(--spring); }
+    .btn:hover svg.arrow { transform: translateX(3px); }
+
+    .play { position: relative; opacity: 0; animation: fade 1.2s var(--ease) .35s forwards; }
+    .stage { transition: transform .6s var(--ease); transform-style: preserve-3d; will-change: transform; }
+    .stage svg { width: 100%; height: auto; overflow: visible; display: block; -webkit-tap-highlight-color: transparent; }
+    .caption {
+      display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 4px;
+      font-size: 14px; font-weight: 600; color: var(--muted); min-height: 24px;
+    }
+    .caption b { display: inline-grid; place-items: center; min-width: 26px; height: 26px; padding: 0 6px; border-radius: 99px; background: var(--ink); color: #fff; font-size: 13px; transition: transform .4s var(--spring); }
+    .caption b.pop { transform: scale(1.25); }
+
+    .car { cursor: pointer; outline: none; }
+    .car .mover, .car .lift { transform-box: view-box; transform-origin: 0 0; }
+    .car .lift { transition: transform .35s var(--spring); }
+    .car:hover .lift, .car:focus-visible .lift { transform: scale(1.07); }
+    .car:focus-visible .body { stroke: var(--ink); stroke-width: 3; }
+    .car.hint .lift { animation: nudge 1.4s ease-in-out infinite; }
+    @keyframes nudge { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+    .car.gone { pointer-events: none; }
+
+    .cloud-bob { animation: bob 4.5s ease-in-out infinite; }
+    @keyframes bob { 50% { transform: translateY(-6px); } }
+    .eye { transform-box: fill-box; transform-origin: center; animation: blink 5s infinite; }
+    @keyframes blink { 0%, 92%, 100% { transform: scaleY(1); } 95% { transform: scaleY(.1); } }
+    .drop { animation: rain 1.2s linear infinite; }
+    @keyframes rain { from { transform: translateY(0); opacity: 0; } 20% { opacity: 1; } to { transform: translateY(34px); opacity: 0; } }
+    .rain { transition: opacity .4s; }
+    .sun { transform-box: fill-box; transform-origin: center; transform: scale(0); transition: transform .8s var(--spring); }
+    .sun-rays { transform-box: fill-box; transform-origin: center; animation: spin 14s linear infinite; }
+    .mouth-open { opacity: 0; transition: opacity .2s; }
+    .solved .sun { transform: scale(1); }
+    .solved .rain { opacity: 0; }
+    .solved .mouth-open { opacity: 1; }
+    .solved .mouth-smile { opacity: 0; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ---------- marquee ---------- */
+    .marquee { border-block: 1px solid var(--line); overflow: hidden; padding: 22px 0; background: var(--paper); }
+    .marquee-track { display: flex; width: max-content; animation: slide 38s linear infinite; }
+    .marquee span { font: 600 clamp(22px, 3vw, 34px)/1 var(--display); letter-spacing: -.02em; padding-right: 34px; display: inline-flex; align-items: center; gap: 34px; white-space: nowrap; }
+    .marquee span:nth-child(even) { color: transparent; -webkit-text-stroke: 1.4px var(--ink); }
+    .marquee svg { width: 22px; height: 22px; flex: none; }
+    @keyframes slide { to { transform: translateX(-50%); } }
+
+    /* ---------- sections ---------- */
+    section { position: relative; }
+    .section { padding: 120px 0; }
+    .head { display: flex; align-items: end; justify-content: space-between; gap: 24px; margin-bottom: 56px; }
+    h2 { font: 700 clamp(34px, 5vw, 64px)/1.05 var(--display); letter-spacing: -.04em; margin: 16px 0 0; }
+    h2 em { font-style: normal; color: var(--coral); }
+    .count { font: 600 clamp(56px, 9vw, 120px)/.8 var(--display); letter-spacing: -.06em; color: transparent; -webkit-text-stroke: 1.5px rgba(29, 27, 38, .2); }
+
+    [data-reveal] { opacity: 0; transform: translateY(36px); transition: opacity 1s var(--ease), transform 1s var(--ease); transition-delay: var(--d, 0s); }
+    [data-reveal].in { opacity: 1; transform: none; }
+
+    /* ---------- games ---------- */
+    .game {
+      position: relative; overflow: hidden; border-radius: 40px;
+      display: grid; grid-template-columns: 1fr 1fr; align-items: center; gap: 24px;
+      padding: 64px; margin-bottom: 28px; min-height: 620px; isolation: isolate;
+    }
+    .game--jam { background: linear-gradient(155deg, #e4f0ff 0%, #cfe2ff 100%); }
+    .game--clouds { background: linear-gradient(155deg, #fff0c9 0%, #ffd9c2 100%); }
+    .game--clouds .info { order: 2; }
+    .game-bg { position: absolute; inset: 0; z-index: -1; pointer-events: none; }
+    .game-bg svg { width: 100%; height: 100%; }
+    .lane { stroke-dasharray: 18 22; animation: lane 2.2s linear infinite; }
+    @keyframes lane { to { stroke-dashoffset: -40; } }
+    .rays { transform-origin: 75% 50%; animation: spin 80s linear infinite; }
+    .game--clouds .rays { transform-origin: 25% 50%; }
+
+    .info { position: relative; max-width: 470px; }
+    .game--clouds .info { justify-self: end; }
+    .info-top { display: flex; align-items: center; gap: 16px; margin-bottom: 30px; }
+    .icon {
+      width: 92px; height: 92px; border-radius: 26px; flex: none;
+      box-shadow: 0 16px 30px -14px rgba(29, 27, 38, .45), 0 0 0 4px rgba(255, 255, 255, .7);
+      transition: transform .5s var(--spring);
+    }
+    .game:hover .icon { transform: rotate(-6deg) scale(1.05); }
+    .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+    .chips span { font-size: 13px; font-weight: 700; padding: 6px 12px; border-radius: 99px; background: rgba(255, 255, 255, .7); }
+    .num { font: 600 14px/1 var(--display); color: var(--muted); letter-spacing: .04em; }
+    h3 { font: 700 clamp(32px, 4.2vw, 52px)/1.02 var(--display); letter-spacing: -.04em; margin: 10px 0 6px; }
+    .sub { font-weight: 700; color: var(--muted); margin: 0 0 18px; }
+    .info p.desc { font-size: 18px; margin: 0 0 22px; }
+    .feats { list-style: none; padding: 0; margin: 0 0 34px; display: grid; gap: 10px; }
+    .feats li { display: flex; align-items: center; gap: 12px; font-weight: 600; }
+    .feats li::before { content: ""; width: 22px; height: 22px; flex: none; border-radius: 8px; background: var(--c, var(--ink)) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 22 22'%3E%3Cpath d='M6.5 11.5l3 3 6-6.5' fill='none' stroke='%23fff' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/100% no-repeat; }
+    .game--jam .feats li::before { --c: var(--blue); }
+    .game--clouds .feats li::before { --c: var(--coral); }
+    .gp { padding: 12px 22px 12px 16px; }
+    .gp small { display: block; font-size: 11px; font-weight: 600; opacity: .7; margin-bottom: 3px; letter-spacing: .02em; }
+    .gp .t { font-size: 17px; text-align: left; }
+    .gp svg { width: 26px; height: 26px; }
+
+    .phones { position: relative; height: 540px; perspective: 1200px; }
+    .phone {
+      position: absolute; top: 50%; left: 50%; width: 236px; aspect-ratio: 9 / 16;
+      border-radius: 34px; padding: 7px; background: var(--ink);
+      box-shadow: 0 40px 60px -30px rgba(29, 27, 38, .55);
+      transform: translate(-50%, -50%) translateX(var(--x, 0)) translateY(var(--y, 0)) rotate(var(--r, 0deg)) scale(var(--s, 1));
+      transition: transform .8s var(--ease);
+    }
+    .phone img { width: 100%; height: 100%; object-fit: cover; border-radius: 27px; background: #ddd; }
+    .phone.p1 { z-index: 3; }
+    .phone.p2 { --x: -118px; --y: 18px; --r: -9deg; --s: .9; z-index: 2; }
+    .phone.p3 { --x: 118px; --y: 18px; --r: 9deg; --s: .9; z-index: 1; }
+    .game:hover .phone.p1 { --y: -10px; }
+    .game:hover .phone.p2 { --x: -160px; --y: 26px; --r: -14deg; }
+    .game:hover .phone.p3 { --x: 160px; --y: 26px; --r: 14deg; }
+    .float { position: absolute; inset: 0; animation: hover 6s ease-in-out infinite; }
+    @keyframes hover { 50% { transform: translateY(-12px); } }
+
+    /* ---------- studio ---------- */
+    .studio-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+    .card {
+      background: var(--paper); border-radius: 30px; padding: 34px 32px 36px;
+      box-shadow: 0 1px 0 var(--line), 0 24px 40px -36px rgba(29, 27, 38, .4);
+      transition: transform .5s var(--spring), box-shadow .5s var(--ease);
+    }
+    .card:hover { transform: translateY(-6px); box-shadow: 0 1px 0 var(--line), 0 34px 50px -36px rgba(29, 27, 38, .5); }
+    .card svg { width: 104px; height: 104px; padding: 10px; margin-bottom: 26px; overflow: visible; border-radius: 30px; background: var(--tint); }
+    .card h4 { font: 600 22px/1.2 var(--display); letter-spacing: -.02em; margin: 0 0 10px; }
+    .card p { margin: 0; color: var(--muted); }
+    .ring { transform-box: fill-box; transform-origin: center; animation: ring 2.4s var(--ease) infinite; }
+    .ring.r2 { animation-delay: .8s; }
+    @keyframes ring { from { transform: scale(.3); opacity: 1; } to { transform: scale(1.25); opacity: 0; } }
+    .tap { transform-box: fill-box; transform-origin: center; animation: tap 2.4s var(--ease) infinite; }
+    @keyframes tap { 0%, 100% { transform: scale(1); } 12% { transform: scale(.82); } 26% { transform: scale(1); } }
+    .slow-cloud { animation: sway 6s ease-in-out infinite; }
+    @keyframes sway { 50% { transform: translateX(8px); } }
+    .z { animation: zz 3s ease-in-out infinite; opacity: 0; }
+    .z.z2 { animation-delay: 1s; }
+    @keyframes zz { 0% { opacity: 0; transform: translate(0, 0); } 30% { opacity: 1; } 100% { opacity: 0; transform: translate(10px, -16px); } }
+    .spark { transform-box: fill-box; transform-origin: center; animation: twinkle 3s var(--ease) infinite; }
+    .spark.s2 { animation-delay: .6s; }
+    .spark.s3 { animation-delay: 1.3s; }
+    @keyframes twinkle { 0%, 100% { transform: scale(.5) rotate(0deg); opacity: .4; } 50% { transform: scale(1) rotate(90deg); opacity: 1; } }
+
+    /* ---------- contact ---------- */
+    .contact {
+      position: relative; overflow: hidden; border-radius: 44px; background: var(--ink); color: #fff;
+      padding: 96px 64px; isolation: isolate;
+    }
+    .contact .eyebrow { color: rgba(255, 255, 255, .55); }
+    .contact h2 { max-width: 700px; }
+    .contact p { color: rgba(255, 255, 255, .65); max-width: 520px; font-size: 18px; margin: 22px 0 40px; }
+    .mail {
+      display: inline-block; text-decoration: none;
+      font: 600 clamp(20px, 4vw, 52px)/1.15 var(--display); letter-spacing: -.035em;
+      background: linear-gradient(90deg, #fff 0 50%, var(--yellow) 50% 100%) 0 0 / 200% 100%;
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+      transition: background-position .7s var(--ease);
+    }
+    .mail:hover { background-position: -100% 0; }
+    .mail-row { display: flex; align-items: center; flex-wrap: wrap; gap: 16px 22px; }
+    .copy { background: rgba(255, 255, 255, .1); color: #fff; }
+    .copy:hover { background: rgba(255, 255, 255, .18); }
+    .copy.ok { background: var(--green); }
+    .flight { position: absolute; z-index: -1; right: -40px; top: 0; width: 560px; height: 100%; opacity: .9; pointer-events: none; }
+    .glow { position: absolute; z-index: -2; width: 520px; height: 520px; border-radius: 50%; right: -120px; bottom: -220px; background: radial-gradient(circle, rgba(148, 102, 255, .45), transparent 65%); }
+
+    /* ---------- footer ---------- */
+    footer { padding: 56px 0 44px; }
+    footer .wrap { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 18px; color: var(--muted); font-size: 15px; font-weight: 600; }
+    footer nav { display: flex; flex-wrap: wrap; gap: 6px 22px; }
+    footer a { text-decoration: none; transition: color .2s; }
+    footer a:hover { color: var(--ink); }
+
+    .confetti { pointer-events: none; }
+
+    /* ---------- responsive ---------- */
+    @media (max-width: 980px) {
+      .hero { min-height: 0; padding-top: 112px; }
+      .hero .wrap { grid-template-columns: 1fr; gap: 28px; }
+      .play { max-width: 520px; width: 100%; margin: 0 auto; }
+      .game { grid-template-columns: 1fr; padding: 48px 36px 24px; min-height: 0; }
+      .game--clouds .info { order: 0; justify-self: start; }
+      .phones { height: 480px; }
+      .studio-grid { grid-template-columns: 1fr; }
+      .contact { padding: 72px 36px; }
+      .flight { opacity: .35; }
+    }
+    @media (max-width: 600px) {
+      :root { --gutter: 16px; }
+      body { font-size: 16px; }
+      .nav-links a:not(.pill) { display: none; }
+      .section { padding: 84px 0; }
+      .head { margin-bottom: 36px; }
+      .game { border-radius: 30px; padding: 36px 22px 8px; }
+      .icon { width: 72px; height: 72px; border-radius: 20px; }
+      .phones { height: 400px; }
+      .phone { width: 168px; border-radius: 26px; padding: 5px; }
+      .phone img { border-radius: 21px; }
+      .phone.p2 { --x: -84px; }
+      .phone.p3 { --x: 84px; }
+      .game:hover .phone.p2 { --x: -100px; }
+      .game:hover .phone.p3 { --x: 100px; }
+      .contact { border-radius: 30px; padding: 56px 22px; }
+      .card { padding: 28px 24px 30px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+      .cloud-bob, .drop, .sun-rays, .marquee-track, .lane, .rays, .float, .blob { animation: none !important; }
+    }
+  </style>
 </head>
 <body>
-  <h1>Patix Games</h1>
-  <p>Mobile games developer.</p>
 
-  <h2>Games</h2>
-  <p>Car Sort Jam: Parking Puzzle</p>
+  <header class="nav" id="nav">
+    <div class="wrap">
+      <a class="brand" href="#top" aria-label="Patix Games — home">
+        <svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="9" fill="#1d1b26"/><path d="M11.5 24V9h5.5a4.5 4.5 0 0 1 0 9h-5.5" fill="none" stroke="#fff" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="23" cy="23" r="3" fill="#ff6b57"/></svg>
+        Patix Games
+      </a>
+      <nav class="nav-links">
+        <a href="#games">Games</a>
+        <a href="#studio">Studio</a>
+        <a class="pill" href="#contact">Contact</a>
+      </nav>
+    </div>
+  </header>
 
-  <h2>Support</h2>
-  <p>Email: patix.games.sup@gmail.com</p>
+  <main id="top">
+    <!-- ================= HERO ================= -->
+    <section class="hero">
+      <div class="blob b1"></div>
+      <div class="blob b2"></div>
+      <div class="wrap">
+        <div>
+          <span class="eyebrow">Indie game studio</span>
+          <h1>
+            <span class="w"><span style="--i:0">Tiny</span></span>
+            <span class="w"><span style="--i:1">games</span></span><br>
+            <span class="w"><span style="--i:2">that</span></span>
+            <span class="w"><span style="--i:3" class="mark">make
+              <svg class="scribble" viewBox="0 0 200 20" preserveAspectRatio="none" aria-hidden="true"><path d="M3 13 C 40 4, 90 4, 120 9 S 175 16, 197 7" fill="none" stroke="#ffc23d" stroke-width="5" stroke-linecap="round" pathLength="1"/></svg>
+            </span></span><br>
+            <span class="w"><span style="--i:4">your</span></span>
+            <span class="w"><span style="--i:5">day.</span></span>
+          </h1>
+          <p class="lede">We're Patix Games — a small team making cozy, colorful casual games you can pick up in a second and keep coming back to.</p>
+          <div class="cta">
+            <a class="btn btn-dark" href="#games">See our games
+              <svg class="arrow" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10h12M11 5l5 5-5 5"/></svg>
+            </a>
+            <a class="btn btn-ghost" href="#contact">Say hi</a>
+          </div>
+        </div>
 
-  <h2>Legal</h2>
-  <p><a href="/Site/car_sort_jam_privacy_policy">Privacy Policy</a></p>
+        <div class="play" id="play">
+          <div class="stage" id="stage">
+            <svg id="board" viewBox="0 0 460 480" role="group" aria-label="Mini parking puzzle: tap a car to drive it out">
+              <defs>
+                <filter id="soft" x="-20%" y="-20%" width="140%" height="140%">
+                  <feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#5b4a9e" flood-opacity=".16"/>
+                </filter>
+                <g id="cloud-shape">
+                  <circle cx="-44" cy="8" r="26"/><circle cx="-12" cy="-10" r="36"/><circle cx="26" cy="-2" r="30"/><circle cx="54" cy="12" r="20"/>
+                  <rect x="-70" y="6" width="144" height="30" rx="15"/>
+                </g>
+              </defs>
+
+              <rect x="64" y="114" width="332" height="332" rx="30" fill="#fffdf9" filter="url(#soft)"/>
+              <g id="cells"></g>
+              <g id="cars"></g>
+
+              <!-- cloud mascot -->
+              <g transform="translate(146 66)">
+                <g class="cloud-bob">
+                  <g transform="translate(62 -34)">
+                    <g class="sun">
+                      <g class="sun-rays" stroke="#ffc23d" stroke-width="5" stroke-linecap="round" id="rays"></g>
+                      <circle r="21" fill="#ffc23d"/>
+                      <circle r="21" fill="none" stroke="#ffb01f" stroke-width="2"/>
+                    </g>
+                  </g>
+                  <g class="rain" stroke="#8fb5ff" stroke-width="3" stroke-linecap="round">
+                    <line class="drop" x1="-46" y1="40" x2="-49" y2="48" style="animation-delay:0s"/>
+                    <line class="drop" x1="-22" y1="44" x2="-25" y2="52" style="animation-delay:.45s"/>
+                    <line class="drop" x1="2" y1="40" x2="-1" y2="48" style="animation-delay:.2s"/>
+                    <line class="drop" x1="26" y1="44" x2="23" y2="52" style="animation-delay:.75s"/>
+                    <line class="drop" x1="50" y1="38" x2="47" y2="46" style="animation-delay:.3s"/>
+                  </g>
+                  <use href="#cloud-shape" fill="#d8d1f5"/>
+                  <use href="#cloud-shape" fill="#fff" transform="translate(-2 -5) scale(.97)"/>
+                  <ellipse cx="-34" cy="15" rx="7" ry="4" fill="#ffb8be" opacity=".85"/>
+                  <ellipse cx="30" cy="15" rx="7" ry="4" fill="#ffb8be" opacity=".85"/>
+                  <g fill="#fff" stroke="#ff7a3d" stroke-width="3">
+                    <rect x="-28" y="-8" width="21" height="17" rx="6"/>
+                    <rect x="1" y="-8" width="21" height="17" rx="6"/>
+                    <path d="M-7 0.5h8" fill="none"/>
+                  </g>
+                  <ellipse class="eye" cx="-17.5" cy="1" rx="3.2" ry="3.6" fill="#1d1b26"/>
+                  <ellipse class="eye" cx="11.5" cy="1" rx="3.2" ry="3.6" fill="#1d1b26"/>
+                  <path class="mouth-smile" d="M-9 17 Q-3 23 3 17" fill="none" stroke="#1d1b26" stroke-width="2.8" stroke-linecap="round"/>
+                  <path class="mouth-open" d="M-10 15 Q-3 29 4 15 Z" fill="#1d1b26" stroke="#1d1b26" stroke-width="2" stroke-linejoin="round"/>
+                </g>
+              </g>
+              <g id="fx" class="confetti"></g>
+            </svg>
+          </div>
+          <div class="caption" id="caption" aria-live="polite"><b id="left">9</b><span id="capText">cars in the jam — tap one to drive it out</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= MARQUEE ================= -->
+    <div class="marquee" aria-hidden="true">
+      <div class="marquee-track" id="marquee">
+        <span>puzzle</span><span>cozy</span><span>one-tap</span><span>idle</span><span>colorful</span><span>relaxing</span><span>pixel art</span><span>satisfying</span>
+      </div>
+    </div>
+
+    <!-- ================= GAMES ================= -->
+    <section class="section" id="games">
+      <div class="wrap">
+        <div class="head" data-reveal>
+          <div>
+            <span class="eyebrow">Our games</span>
+            <h2>Out now on <em>Google&nbsp;Play</em></h2>
+          </div>
+          <span class="count" aria-hidden="true">02</span>
+        </div>
+
+        <article class="game game--jam" data-reveal>
+          <div class="game-bg" aria-hidden="true">
+            <svg viewBox="0 0 1200 640" preserveAspectRatio="xMidYMid slice">
+              <g class="rays" opacity=".35">
+                <circle cx="900" cy="320" r="300" fill="none" stroke="#fff" stroke-width="2"/>
+                <circle cx="900" cy="320" r="200" fill="none" stroke="#fff" stroke-width="2"/>
+                <circle cx="900" cy="320" r="400" fill="none" stroke="#fff" stroke-width="2"/>
+              </g>
+              <g fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" opacity=".75">
+                <path class="lane" d="M-20 560 C 300 520, 520 640, 1220 470"/>
+                <path class="lane" d="M-20 90 C 260 140, 640 20, 1220 120" style="animation-duration:3s"/>
+              </g>
+            </svg>
+          </div>
+          <div class="info">
+            <div class="info-top">
+              <img class="icon" src="assets/csj-icon.webp" alt="Car Sort Jam icon" width="92" height="92" loading="lazy">
+              <div class="chips"><span>Puzzle</span><span>Color sort</span><span>Free</span></div>
+            </div>
+            <span class="num">01 / 02</span>
+            <h3>Car Sort Jam</h3>
+            <p class="sub">Parking Puzzle</p>
+            <p class="desc">Tap cars, match passengers by color and clear every parking jam. Easy to learn, tricky to master.</p>
+            <ul class="feats">
+              <li>One-tap controls</li>
+              <li>Relaxing, no time pressure</li>
+              <li>Puzzles that reward planning</li>
+            </ul>
+            <a class="btn btn-dark gp" href="https://play.google.com/store/apps/details?id=com.PatixGames.CarSortJam" target="_blank" rel="noopener">
+              <svg viewBox="0 0 26 26" aria-hidden="true"><path d="M7 4.5v17a1 1 0 0 0 1.5.86l14-8.5a1 1 0 0 0 0-1.72l-14-8.5A1 1 0 0 0 7 4.5z" fill="#fff"/></svg>
+              <span class="t"><small>GET IT ON</small>Google Play</span>
+            </a>
+          </div>
+          <div class="phones" aria-hidden="true">
+            <div class="float">
+              <div class="phone p2"><img src="assets/csj-2.jpg" alt="" loading="lazy" width="480" height="853"></div>
+              <div class="phone p3"><img src="assets/csj-3.jpg" alt="" loading="lazy" width="480" height="853"></div>
+              <div class="phone p1"><img src="assets/csj-1.jpg" alt="" loading="lazy" width="480" height="853"></div>
+            </div>
+          </div>
+        </article>
+
+        <article class="game game--clouds" data-reveal>
+          <div class="game-bg" aria-hidden="true">
+            <svg viewBox="0 0 1200 640" preserveAspectRatio="xMidYMid slice">
+              <g class="rays" fill="#fff" opacity=".28" id="sunburst"></g>
+              <g fill="#fff">
+                <path class="spark" d="M560 90l5 14 14 5-14 5-5 14-5-14-14-5 14-5z"/>
+                <path class="spark s2" d="M1100 520l4 11 11 4-11 4-4 11-4-11-11-4 11-4z"/>
+                <path class="spark s3" d="M640 560l4 11 11 4-11 4-4 11-4-11-11-4 11-4z"/>
+              </g>
+            </svg>
+          </div>
+          <div class="info">
+            <div class="info-top">
+              <img class="icon" src="assets/cop-icon.webp" alt="Clouds on Payroll icon" width="92" height="92" loading="lazy" style="image-rendering:pixelated">
+              <div class="chips"><span>Idle tycoon</span><span>Pixel art</span><span>Free</span></div>
+            </div>
+            <span class="num">02 / 02</span>
+            <h3>Clouds on Payroll</h3>
+            <p class="sub">Idle Tycoon</p>
+            <p class="desc">Run a pixel weather factory. Hire cloud workers, fill orders and automate the sky — one forecast at a time.</p>
+            <ul class="feats">
+              <li>Six weather departments</li>
+              <li>A lovable, slightly chaotic cloud crew</li>
+              <li>Tap, hold or let it run idle</li>
+            </ul>
+            <a class="btn btn-dark gp" href="https://play.google.com/store/apps/details?id=com.PatixGames.CloudsonPayroll" target="_blank" rel="noopener">
+              <svg viewBox="0 0 26 26" aria-hidden="true"><path d="M7 4.5v17a1 1 0 0 0 1.5.86l14-8.5a1 1 0 0 0 0-1.72l-14-8.5A1 1 0 0 0 7 4.5z" fill="#fff"/></svg>
+              <span class="t"><small>GET IT ON</small>Google Play</span>
+            </a>
+          </div>
+          <div class="phones" aria-hidden="true">
+            <div class="float" style="animation-delay:-3s">
+              <div class="phone p2"><img src="assets/cop-3.webp" alt="" loading="lazy" width="480" height="853"></div>
+              <div class="phone p3"><img src="assets/cop-4.webp" alt="" loading="lazy" width="480" height="853"></div>
+              <div class="phone p1"><img src="assets/cop-1.webp" alt="" loading="lazy" width="480" height="853"></div>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- ================= STUDIO ================= -->
+    <section class="section" id="studio" style="padding-top:20px">
+      <div class="wrap">
+        <div class="head" data-reveal>
+          <div>
+            <span class="eyebrow">Studio</span>
+            <h2>Small team.<br>Big care for <em>small games.</em></h2>
+          </div>
+        </div>
+        <div class="studio-grid">
+          <div class="card" data-reveal style="--d:.0s; --tint:#e8efff">
+            <svg viewBox="0 0 84 84" aria-hidden="true">
+              <circle class="ring" cx="42" cy="42" r="34" fill="none" stroke="#3d7bff" stroke-width="3"/>
+              <circle class="ring r2" cx="42" cy="42" r="34" fill="none" stroke="#3d7bff" stroke-width="3"/>
+              <circle class="tap" cx="42" cy="42" r="16" fill="#3d7bff"/>
+              <circle cx="37" cy="37" r="5" fill="#fff" opacity=".45"/>
+            </svg>
+            <h4>One tap in</h4>
+            <p>Rules you get in seconds. No long tutorials, no manuals — just start playing.</p>
+          </div>
+          <div class="card" data-reveal style="--d:.12s; --tint:#ece7ff">
+            <svg viewBox="0 0 84 84" aria-hidden="true">
+              <g class="slow-cloud">
+                <g fill="#d8d1f5"><circle cx="28" cy="48" r="14"/><circle cx="44" cy="40" r="18"/><circle cx="60" cy="50" r="12"/><rect x="14" y="48" width="58" height="16" rx="8"/></g>
+                <g fill="#fff" transform="translate(-1 -3)"><circle cx="28" cy="48" r="13"/><circle cx="44" cy="40" r="17"/><circle cx="60" cy="50" r="11"/><rect x="15" y="48" width="56" height="14" rx="7"/></g>
+                <path d="M33 50q3 3 6 0M47 50q3 3 6 0" fill="none" stroke="#1d1b26" stroke-width="2.4" stroke-linecap="round"/>
+              </g>
+              <g fill="#9466ff" font-family="Unbounded, sans-serif" font-weight="700">
+                <text class="z" x="62" y="26" font-size="12">z</text>
+                <text class="z z2" x="70" y="18" font-size="9">z</text>
+              </g>
+            </svg>
+            <h4>No rush</h4>
+            <p>Calm pace and no timers breathing down your neck. Play for a minute or an evening.</p>
+          </div>
+          <div class="card" data-reveal style="--d:.24s; --tint:#fff1d2">
+            <svg viewBox="0 0 84 84" aria-hidden="true">
+              <path class="spark" d="M42 10l7 22 22 7-22 7-7 22-7-22-22-7 22-7z" fill="#ffc23d"/>
+              <path class="spark s2" d="M68 58l3 8 8 3-8 3-3 8-3-8-8-3 8-3z" fill="#ff6b57"/>
+              <path class="spark s3" d="M16 60l2.5 6.5 6.5 2.5-6.5 2.5-2.5 6.5-2.5-6.5-6.5-2.5 6.5-2.5z" fill="#35c27a"/>
+            </svg>
+            <h4>Tiny details</h4>
+            <p>Juicy animations, cozy art and small surprises that make every session feel good.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= CONTACT ================= -->
+    <section class="section" id="contact" style="padding-top:20px">
+      <div class="wrap">
+        <div class="contact" data-reveal>
+          <div class="glow"></div>
+          <svg class="flight" viewBox="0 0 560 520" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+            <path id="flightPath" d="M40 430 C 140 420, 200 330, 170 270 C 140 210, 60 240, 90 300 C 120 360, 260 330, 320 240 S 420 90, 520 70" fill="none" stroke="rgba(255,255,255,.22)" stroke-width="2.5" stroke-dasharray="2 12" stroke-linecap="round"/>
+            <g>
+              <path d="M-16 -12 L18 0 L-16 12 L-8 0 Z" fill="#fff"/>
+              <path d="M-8 0 L18 0 L-12 9 Z" fill="#d8d1f5"/>
+              <animateMotion dur="9s" repeatCount="indefinite" rotate="auto" keyPoints="0;1" keyTimes="0;1" calcMode="spline" keySplines=".45 0 .55 1">
+                <mpath href="#flightPath"/>
+              </animateMotion>
+            </g>
+          </svg>
+          <span class="eyebrow">Contact</span>
+          <h2>Questions? Ideas?<br>Just say hi.</h2>
+          <p>Support, feedback, bug reports, partnerships — write to us about anything. We read every message.</p>
+          <div class="mail-row">
+            <a class="mail" href="mailto:patix.games.sup@gmail.com">patix.games.sup@<wbr>gmail.com</a>
+            <button class="btn copy" id="copy" type="button">
+              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="7" y="7" width="10" height="10" rx="2.5"/><path d="M13 7V5.5A2.5 2.5 0 0 0 10.5 3h-5A2.5 2.5 0 0 0 3 5.5v5A2.5 2.5 0 0 0 5.5 13H7"/></svg>
+              <span>Copy</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <a class="brand" href="#top">
+        <svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="9" fill="#1d1b26"/><path d="M11.5 24V9h5.5a4.5 4.5 0 0 1 0 9h-5.5" fill="none" stroke="#fff" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="23" cy="23" r="3" fill="#ff6b57"/></svg>
+        Patix Games
+      </a>
+      <nav>
+        <a href="https://play.google.com/store/apps/dev?id=5858906495428429618" target="_blank" rel="noopener">Google Play</a>
+        <a href="/Site/car_sort_jam_privacy_policy">Privacy Policy</a>
+        <a href="mailto:patix.games.sup@gmail.com">patix.games.sup@gmail.com</a>
+      </nav>
+      <span>© <span id="year">2026</span> Patix Games</span>
+    </div>
+  </footer>
+
+  <script>
+  (() => {
+    const NS = "http://www.w3.org/2000/svg";
+    const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const el = (tag, attrs = {}, parent) => {
+      const n = document.createElementNS(NS, tag);
+      for (const k in attrs) n.setAttribute(k, attrs[k]);
+      if (parent) parent.appendChild(n);
+      return n;
+    };
+
+    /* ---------- nav ---------- */
+    const nav = document.getElementById("nav");
+    const onScroll = () => nav.classList.toggle("scrolled", scrollY > 10);
+    addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+    document.getElementById("year").textContent = new Date().getFullYear();
+
+    /* ---------- reveal on scroll ---------- */
+    const io = new IntersectionObserver(entries => {
+      for (const e of entries) if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); }
+    }, { threshold: .12, rootMargin: "0px 0px -40px 0px" });
+    document.querySelectorAll("[data-reveal]").forEach(n => io.observe(n));
+
+    /* ---------- marquee: duplicate content with star separators ---------- */
+    const track = document.getElementById("marquee");
+    const star = '<svg viewBox="0 0 22 22"><path d="M11 1l2.8 7.2L21 11l-7.2 2.8L11 21l-2.8-7.2L1 11l7.2-2.8z" fill="#ff6b57"/></svg>';
+    track.querySelectorAll("span").forEach(s => s.insertAdjacentHTML("beforeend", star));
+    track.innerHTML += track.innerHTML;
+
+    /* ---------- sunburst for the Clouds card ---------- */
+    const burst = document.getElementById("sunburst");
+    for (let i = 0; i < 18; i++) {
+      const a0 = (i / 18) * Math.PI * 2, a1 = a0 + Math.PI / 18, R = 1400, cx = 300, cy = 320;
+      el("path", { d: `M${cx} ${cy}L${cx + R * Math.cos(a0)} ${cy + R * Math.sin(a0)}L${cx + R * Math.cos(a1)} ${cy + R * Math.sin(a1)}Z` }, burst);
+    }
+
+    /* ---------- copy email ---------- */
+    const copyBtn = document.getElementById("copy");
+    copyBtn.addEventListener("click", async () => {
+      try { await navigator.clipboard.writeText("patix.games.sup@gmail.com"); } catch (e) { location.href = "mailto:patix.games.sup@gmail.com"; return; }
+      copyBtn.classList.add("ok");
+      copyBtn.querySelector("span").textContent = "Copied!";
+      setTimeout(() => { copyBtn.classList.remove("ok"); copyBtn.querySelector("span").textContent = "Copy"; }, 1800);
+    });
+
+    /* ================= hero puzzle ================= */
+    const svg = document.getElementById("board");
+    const carsG = document.getElementById("cars");
+    const fx = document.getElementById("fx");
+    const leftEl = document.getElementById("left");
+    const capText = document.getElementById("capText");
+    const BX = 74, BY = 124, C = 52, N = 6;
+
+    const rays = document.getElementById("rays");
+    for (let i = 0; i < 12; i++) {
+      const a = i / 12 * Math.PI * 2;
+      el("line", { x1: Math.cos(a) * 28, y1: Math.sin(a) * 28, x2: Math.cos(a) * 37, y2: Math.sin(a) * 37 }, rays);
+    }
+
+    const cells = document.getElementById("cells");
+    for (let y = 0; y < N; y++) for (let x = 0; x < N; x++)
+      el("rect", { x: BX + x * C + 3, y: BY + y * C + 3, width: C - 6, height: C - 6, rx: 11, fill: "#f2eff8" }, cells);
+
+    const COLORS = {
+      blue: ["#3d7bff", "#2554c9"], yellow: ["#ffc23d", "#d99406"], green: ["#35c27a", "#1f8c55"],
+      purple: ["#9466ff", "#6a3fd6"], orange: ["#ff933c", "#d9660e"], red: ["#ff5a5f", "#cc2f3b"], pink: ["#ff7eb6", "#d94c8a"]
+    };
+    // o: h = horizontal (x..x+1), v = vertical (y..y+1); solvable order: G H I F E D C B A
+    const LEVEL = [
+      { x: 0, y: 0, o: "h", dir: "r", c: "blue" },
+      { x: 3, y: 0, o: "v", dir: "d", c: "yellow" },
+      { x: 2, y: 3, o: "h", dir: "l", c: "green" },
+      { x: 0, y: 2, o: "v", dir: "d", c: "purple" },
+      { x: 0, y: 5, o: "h", dir: "r", c: "orange" },
+      { x: 5, y: 4, o: "v", dir: "u", c: "red" },
+      { x: 5, y: 1, o: "v", dir: "u", c: "blue" },
+      { x: 1, y: 1, o: "h", dir: "l", c: "pink" },
+      { x: 3, y: 4, o: "h", dir: "l", c: "yellow" }
+    ];
+    const DIRS = { r: [1, 0, 0], l: [-1, 0, 180], d: [0, 1, 90], u: [0, -1, -90] };
+
+    let cars = [], grid = new Map(), left = 0, busy = false, hintTimer;
+    const key = (x, y) => x + "," + y;
+
+    function cellsOf(c) { return c.o === "h" ? [[c.x, c.y], [c.x + 1, c.y]] : [[c.x, c.y], [c.x, c.y + 1]]; }
+    function front(c) {
+      if (c.dir === "r") return [c.x + 1, c.y];
+      if (c.dir === "d") return [c.x, c.y + 1];
+      return [c.x, c.y];
+    }
+    // free cells ahead and the first car that blocks the way (if any)
+    function scan(c) {
+      const [dx, dy] = DIRS[c.dir];
+      let [x, y] = front(c), free = 0;
+      for (;;) {
+        x += dx; y += dy;
+        if (x < 0 || y < 0 || x >= N || y >= N) return { free, blocker: null };
+        const id = grid.get(key(x, y));
+        if (id != null) return { free, blocker: cars[id] };
+        free++;
+      }
+    }
+
+    function drawCar(c, i) {
+      const [col, dark] = COLORS[c.c];
+      const cx = c.o === "h" ? BX + (c.x + 1) * C : BX + c.x * C + C / 2;
+      const cy = c.o === "h" ? BY + c.y * C + C / 2 : BY + (c.y + 1) * C;
+      const g = el("g", { class: "car", transform: `translate(${cx} ${cy})`, tabindex: 0, role: "button", "aria-label": `${c.c} car` }, carsG);
+      const mover = el("g", { class: "mover" }, g);
+      const lift = el("g", { class: "lift" }, mover);
+      const H = c.o === "h";
+      el("rect", { x: (H ? -47 : -20) + 1, y: (H ? -20 : -47) + 6, width: H ? 94 : 40, height: H ? 40 : 94, rx: 13, fill: "#4a3a8c", opacity: .14 }, lift);
+      const body = el("g", { transform: `rotate(${DIRS[c.dir][2]})` }, lift);
+      el("rect", { x: -47, y: -20, width: 94, height: 40, rx: 13, fill: dark }, body);
+      el("rect", { class: "body", x: -47, y: -20, width: 94, height: 36, rx: 13, fill: col }, body);
+      el("rect", { x: 14, y: -14, width: 14, height: 24, rx: 5, fill: dark, opacity: .55 }, body);
+      el("rect", { x: -40, y: -13, width: 9, height: 22, rx: 4, fill: dark, opacity: .55 }, body);
+      el("rect", { x: -26, y: -15, width: 36, height: 8, rx: 4, fill: "#fff", opacity: .28 }, body);
+      el("circle", { cx: 42, cy: -12, r: 3, fill: "#fff6cf" }, body);
+      el("circle", { cx: 42, cy: 8, r: 3, fill: "#fff6cf" }, body);
+      el("path", { d: "M-16 -2H6M-1 -10L7 -2L-1 6", fill: "none", stroke: "#fff", "stroke-width": 5, "stroke-linecap": "round", "stroke-linejoin": "round" }, body);
+      c.g = g; c.mover = mover; c.id = i; c.gone = false;
+      const go = e => { e.preventDefault(); tap(c); };
+      g.addEventListener("click", go);
+      g.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") go(e); });
+      return g;
+    }
+
+    function setLeft(n) {
+      left = n;
+      leftEl.textContent = n;
+      leftEl.classList.add("pop");
+      setTimeout(() => leftEl.classList.remove("pop"), 180);
+    }
+
+    function build(first) {
+      carsG.innerHTML = "";
+      grid.clear();
+      cars = LEVEL.map(o => ({ ...o }));
+      cars.forEach((c, i) => {
+        cellsOf(c).forEach(([x, y]) => grid.set(key(x, y), i));
+        drawCar(c, i);
+        if (!reduce) c.mover.animate(
+          [{ transform: "translate(0px,-26px) scale(.6)", opacity: 0 }, { transform: "none", opacity: 1 }],
+          { duration: 700, delay: (first ? 500 : 0) + i * 70, easing: "cubic-bezier(.34,1.56,.64,1)", fill: "backwards" }
+        );
+      });
+      setLeft(cars.length);
+      capText.textContent = "cars in the jam — tap one to drive it out";
+      svg.classList.remove("solved");
+      scheduleHint();
+    }
+
+    function scheduleHint() {
+      clearTimeout(hintTimer);
+      cars.forEach(c => c.g.classList.remove("hint"));
+      hintTimer = setTimeout(() => {
+        const free = cars.find(c => !c.gone && !scan(c).blocker);
+        if (free) free.g.classList.add("hint");
+      }, 4500);
+    }
+
+    function tap(c) {
+      if (c.gone || busy && left === 0) return;
+      scheduleHint();
+      const [dx, dy] = DIRS[c.dir];
+      const { free, blocker } = scan(c);
+      if (!blocker) {
+        c.gone = true;
+        c.g.classList.add("gone");
+        cellsOf(c).forEach(([x, y]) => grid.delete(key(x, y)));
+        const d = (free + 3.5) * C;
+        c.mover.animate(
+          [{ transform: "translate(0px,0px)", opacity: 1 },
+           { transform: `translate(${dx * -6}px,${dy * -6}px)`, opacity: 1, offset: .12 },
+           { transform: `translate(${dx * d * .7}px,${dy * d * .7}px)`, opacity: 1, offset: .7 },
+           { transform: `translate(${dx * d}px,${dy * d}px)`, opacity: 0 }],
+          { duration: reduce ? 1 : 520 + free * 40, easing: "cubic-bezier(.55,0,.8,.4)", fill: "forwards" }
+        );
+        setLeft(left - 1);
+        if (left === 0) win();
+      } else {
+        const d = free * C + 7;
+        const t = 220 + free * 70;
+        c.mover.animate(
+          [{ transform: "translate(0px,0px)" },
+           { transform: `translate(${dx * d}px,${dy * d}px)`, offset: .45, easing: "cubic-bezier(.3,1.4,.6,1)" },
+           { transform: "translate(0px,0px)" }],
+          { duration: reduce ? 1 : t * 2.2, easing: "cubic-bezier(.5,0,.9,.6)" }
+        );
+        setTimeout(() => {
+          blocker.mover.animate(
+            [{ transform: "translate(0px,0px)" }, { transform: `translate(${dx * 6}px,${dy * 6}px)` }, { transform: `translate(${dx * -3}px,${dy * -3}px)` }, { transform: "translate(0px,0px)" }],
+            { duration: 360, easing: "ease-out" }
+          );
+        }, reduce ? 0 : t * 2.2 * .45);
+      }
+    }
+
+    function win() {
+      busy = true;
+      clearTimeout(hintTimer);
+      svg.classList.add("solved");
+      capText.textContent = "Jam cleared! Here comes a new one…";
+      if (!reduce) confetti();
+      setTimeout(() => { busy = false; build(false); }, 2600);
+    }
+
+    function confetti() {
+      const palette = Object.values(COLORS).map(c => c[0]);
+      const ox = BX + 3 * C, oy = BY + 3 * C;
+      for (let i = 0; i < 46; i++) {
+        const w = 6 + Math.random() * 6, h = 4 + Math.random() * 6;
+        const p = el("rect", { x: ox - w / 2, y: oy - h / 2, width: w, height: h, rx: 2, fill: palette[i % palette.length] }, fx);
+        const a = Math.random() * Math.PI * 2, v = 120 + Math.random() * 170;
+        const tx = Math.cos(a) * v, ty = Math.sin(a) * v - 60, rot = (Math.random() - .5) * 900;
+        p.style.transformBox = "fill-box"; p.style.transformOrigin = "center";
+        p.animate(
+          [{ transform: "translate(0,0) rotate(0deg) scale(.4)", opacity: 1 },
+           { transform: `translate(${tx * .8}px,${ty * .8}px) rotate(${rot * .6}deg) scale(1)`, opacity: 1, offset: .45 },
+           { transform: `translate(${tx}px,${ty + 160}px) rotate(${rot}deg) scale(.9)`, opacity: 0 }],
+          { duration: 1500 + Math.random() * 700, easing: "cubic-bezier(.2,.7,.4,1)", fill: "forwards" }
+        ).onfinish = () => p.remove();
+      }
+    }
+
+    build(true);
+
+    /* ---------- gentle 3D tilt toward the pointer ---------- */
+    const stage = document.getElementById("stage");
+    const play = document.getElementById("play");
+    if (!reduce && matchMedia("(hover: hover)").matches) {
+      play.addEventListener("pointermove", e => {
+        const r = play.getBoundingClientRect();
+        const px = (e.clientX - r.left) / r.width - .5, py = (e.clientY - r.top) / r.height - .5;
+        stage.style.transform = `perspective(1000px) rotateX(${-py * 7}deg) rotateY(${px * 9}deg)`;
+      });
+      play.addEventListener("pointerleave", () => { stage.style.transform = ""; });
+    }
+  })();
+  </script>
 </body>
 </html>
